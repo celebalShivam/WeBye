@@ -1,6 +1,11 @@
 const restify = require("restify");
-const { BotFrameworkAdapter, MemoryStorage } = require("botbuilder");
+const {
+  BotFrameworkAdapter,
+  MemoryStorage,
+  ConversationState,
+} = require("botbuilder");
 const { BotActivityHandler } = require("./BotActivityHandler");
+const { RootDialog } = require("./Dialogs/RootDialog");
 
 const adapter = new BotFrameworkAdapter({ appId: "", appPassword: "" });
 
@@ -16,7 +21,10 @@ server.listen(3978, () => {
 });
 
 const memory = new MemoryStorage();
-const mainBot = new BotActivityHandler();
+let conversationState = new ConversationState(memory);
+
+const rootDialog = new RootDialog(conversationState);
+const mainBot = new BotActivityHandler(conversationState, rootDialog);
 
 server.post("/api/messages", (req, res, next) => {
   adapter.processActivity(req, res, async (context) => {
